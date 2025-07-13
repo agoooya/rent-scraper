@@ -21,10 +21,78 @@ SERVICE_ACCOUNT_FILE = 'key.json'
 
 # 3. データを取得したい市区町村のリスト
 TARGET_AREAS = [
+    # --- 名古屋・尾張エリア ---
+    {"prefecture": "愛知県", "city": "名古屋市千種区"},
+    {"prefecture": "愛知県", "city": "名古屋市東区"},
+    {"prefecture": "愛知県", "city": "名古屋市北区"},
+    {"prefecture": "愛知県", "city": "名古屋市西区"},
+    {"prefecture": "愛知県", "city": "名古屋市中村区"},
+    {"prefecture": "愛知県", "city": "名古屋市中区"},
+    {"prefecture": "愛知県", "city": "名古屋市昭和区"},
+    {"prefecture": "愛知県", "city": "名古屋市瑞穂区"},
+    {"prefecture": "愛知県", "city": "名古屋市熱田区"},
+    {"prefecture": "愛知県", "city": "名古屋市中川区"},
+    {"prefecture": "愛知県", "city": "名古屋市港区"},
+    {"prefecture": "愛知県", "city": "名古屋市南区"},
+    {"prefecture": "愛知県", "city": "名古屋市守山区"},
+    {"prefecture": "愛知県", "city": "名古屋市緑区"},
+    {"prefecture": "愛知県", "city": "名古屋市名東区"},
+    {"prefecture": "愛知県", "city": "名古屋市天白区"},
+    {"prefecture": "愛知県", "city": "一宮市"},
+    {"prefecture": "愛知県", "city": "瀬戸市"},
+    {"prefecture": "愛知県", "city": "春日井市"},
+    {"prefecture": "愛知県", "city": "犬山市"},
+    {"prefecture": "愛知県", "city": "江南市"},
+    {"prefecture": "愛知県", "city": "小牧市"},
+    {"prefecture": "愛知県", "city": "稲沢市"},
+    {"prefecture": "愛知県", "city": "尾張旭市"},
+    {"prefecture": "愛知県", "city": "岩倉市"},
+    {"prefecture": "愛知県", "city": "豊明市"},
+    {"prefecture": "愛知県", "city": "日進市"},
+    {"prefecture": "愛知県", "city": "清須市"},
+    {"prefecture": "愛知県", "city": "北名古屋市"},
+    {"prefecture": "愛知県", "city": "長久手市"},
+    {"prefecture": "愛知県", "city": "東郷町"},
+    {"prefecture": "愛知県", "city": "豊山町"},
+    {"prefecture": "愛知県", "city": "大口町"},
+    {"prefecture": "愛知県", "city": "扶桑町"},
+    {"prefecture": "愛知県", "city": "津島市"},
+    {"prefecture": "愛知県", "city": "愛西市"},
+    {"prefecture": "愛知県", "city": "弥富市"},
+    {"prefecture": "愛知県", "city": "あま市"},
+    {"prefecture": "愛知県", "city": "大治町"},
+    {"prefecture": "愛知県", "city": "蟹江町"},
+    {"prefecture": "愛知県", "city": "飛島村"},
+    {"prefecture": "愛知県", "city": "半田市"},
+    {"prefecture": "愛知県", "city": "常滑市"},
+    {"prefecture": "愛知県", "city": "東海市"},
+    {"prefecture": "愛知県", "city": "大府市"},
+    {"prefecture": "愛知県", "city": "知多市"},
+    {"prefecture": "愛知県", "city": "阿久比町"},
+    {"prefecture": "愛知県", "city": "東浦町"},
+    {"prefecture": "愛知県", "city": "南知多町"},
+    {"prefecture": "愛知県", "city": "美浜町"},
+    {"prefecture": "愛知県", "city": "武豊町"},
+
+    # --- 西三河・東三河エリア ---
+    {"prefecture": "愛知県", "city": "岡崎市"},
+    {"prefecture": "愛知県", "city": "碧南市"},
+    {"prefecture": "愛知県", "city": "刈谷市"},
+    {"prefecture": "愛知県", "city": "豊田市"},
+    {"prefecture": "愛知県", "city": "安城市"},
+    {"prefecture": "愛知県", "city": "西尾市"},
+    {"prefecture": "愛知県", "city": "知立市"},
+    {"prefecture": "愛知県", "city": "高浜市"},
+    {"prefecture": "愛知県", "city": "みよし市"},
+    {"prefecture": "愛知県", "city": "幸田町"},
     {"prefecture": "愛知県", "city": "豊橋市"},
     {"prefecture": "愛知県", "city": "豊川市"},
     {"prefecture": "愛知県", "city": "蒲郡市"},
-    {"prefecture": "愛知県", "city": "名古屋市中区"},
+    {"prefecture": "愛知県", "city": "新城市"},
+    {"prefecture": "愛知県", "city": "田原市"},
+    {"prefecture": "愛知県", "city": "設楽町"},
+    {"prefecture": "愛知県", "city": "東栄町"},
+    {"prefecture": "愛知県", "city": "豊根村"},
 ]
 
 # (参考) その他の設定
@@ -34,6 +102,8 @@ MAX_PAGES_PER_AREA = 1
 # ===============================================================
 # ★★★★★【設定箇所】はここまでです。これより下は触らないでください ★★★★★
 # ===============================================================
+
+# --- ここからプログラム本体 ---
 
 def setup_gspread():
     try:
@@ -76,12 +146,12 @@ def get_suumo_data(pref_name, city, property_types, pages):
                 data = {
                     "取得日時": now,
                     "種別": prop.find('div', class_='ui-media-aside--memory').text.strip(),
-                    "物件名": prop.find('div', 'cassetteitem_content-title').text.strip(),
-                    "家賃": prop.find('span', 'cassetteitem_price--rent').text.strip(),
-                    "管理費": prop.find('span', 'cassetteitem_price--administration').text.strip(),
-                    "敷金": prop.find('span', 'cassetteitem_price--deposit').text.strip(),
-                    "礼金": prop.find('span', 'cassetteitem_price--gratuity').text.strip(),
-                    "間取り": prop.find('span', 'cassetteitem_madori').text.strip(),
+                    "物件名": prop.find('div', class_='cassetteitem_content-title').text.strip(),
+                    "家賃": prop.find('span', class_='cassetteitem_price--rent').text.strip(),
+                    "管理費": prop.find('span', class_='cassetteitem_price--administration').text.strip(),
+                    "敷金": prop.find('span', class_='cassetteitem_price--deposit').text.strip(),
+                    "礼金": prop.find('span', class_='cassetteitem_price--gratuity').text.strip(),
+                    "間取り": prop.find('span', class_='cassetteitem_madori').text.strip(),
                     "面積": prop.find('span', 'cassetteitem_menseki').text.strip(),
                     "築年数": prop.find_all('li', class_='cassetteitem_detail-col2')[0].text.strip(),
                     "住所": prop.find('li', class_='cassetteitem_detail-col1').text.strip()
