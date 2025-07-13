@@ -19,7 +19,7 @@ SPREADSHEET_NAME = "賃料データベース"
 # 2. サービスアカウントのJSONキーファイル名（このままでOK）
 SERVICE_ACCOUNT_FILE = 'key.json' 
 
-# 3. データを取得したい市区町村のリスト
+# 3. データを取得したい市区町村のリスト（好きなだけ追加・編集してください）
 TARGET_AREAS = [
     # --- 名古屋・尾張エリア ---
     {"prefecture": "愛知県", "city": "名古屋市千種区"},
@@ -130,4 +130,66 @@ def get_suumo_data(pref_name, city, property_types, pages):
     area_property_list = []
     for page in range(1, pages + 1):
         full_url = base_url + urllib.parse.urlencode(params) + f"&page={page}&" + "&".join(shkr_params)
-headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"}
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"}
+        try:
+            response = requests.get(full_url, headers=headers, timeout=20)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"  └ ❌ Error: サイトにアクセスできませんでした。スキップします。 {e}")
+            break
+        soup = BeautifulSoup(response.content, 'html.parser')
+        all_properties = soup.find_all('div', class_='cassetteitem')
+        if not all_properties: break
+        now = datetime.now(pytz.timezone('Asia/Tokyo')).strftime('%Y-%m-%d %H:%M:%S')
+        for prop in all_properties:
+            try:
+                data = {
+                    "取得日時": now,
+                    "種別": prop.find('div', class_='ui-media-aside--memory').text.strip(),
+                    "物件名": prop.find('div', 'cassetteitem_content-title').text.strip(),
+                    "家賃": prop.find('span', 'cassetteitem_price--rent').text.strip(),
+                    "管理費": prop.find('span', 'cassetteitem_price--administration').text.strip(),
+                    "敷金": prop.find('span', 'cassetteitem_price--deposit').text.strip(),
+                    "礼金": prop.find('span', 'cassetteitem_price--gratuity').text.strip(),
+                    "間取り": prop.find('span', 'cassetteitem_madori').text.strip(),
+                    "面積": prop.find('span', 'cassetteitem_menseki').text.strip(),
+                    "築年数": prop.find_all('li', class_='cassetteitem_detail-col2')[0].text.strip(),
+                    "住所": prop.find('li', class_='cassetteitem_detail-col1').text.strip()
+                }
+                area_property_list.append(list(data.values()))
+            except Exception:
+                continue
+        time.sleep(5)
+    print(f"  └ 取得件数: {len(area_property_list)} 件")
+    return area_property_list
+
+def main():
+    start_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    print(f"==================================================")
+    print(f"プログラム実行開始: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"==================================================")
+    
+    worksheet = setup_gspread()
+    if worksheet:
+        all_data_to_append = []
+        for area in TARGET_AREAS:
+            data_list = get_suumo_data(area["prefecture"], area["city"], PROPERTY_TYPES, MAX_PAGES_PER_AREA)
+            if data_list:
+                all_data_to_append.extend(data_list)
+            time.sleep(10)
+        
+        if all_data_to_append:
+            print(f"\n> Total: {len(all_data_to_append)} 件の新規データを書き込みます...")
+            worksheet.append_rows(all_data_to_append, value_input_option='USER_ENTERED')
+            print("✅ Log: 書き込み完了！")
+        else:
+            print("\n> Info: 今回は追加する新規データがありませんでした。")
+
+    end_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    print(f"\n==================================================")
+    print(f"プログラム実行終了: {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"処理時間: {end_time - start_time}")
+    print(f"==================================================")
+
+if __name__ == "__main__":
+    main()
