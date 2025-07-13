@@ -130,4 +130,4 @@ def get_suumo_data(pref_name, city, property_types, pages):
     area_property_list = []
     for page in range(1, pages + 1):
         full_url = base_url + urllib.parse.urlencode(params) + f"&page={page}&" + "&".join(shkr_params)
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
+headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"}
